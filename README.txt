@@ -32,8 +32,8 @@ system that automatically deducts from the correct money pool. 🏦
   2. 💻 TECH STACK
 ================================================================================
 
-  🐍 Backend:   Python 3.10+, Django 4.2+, SQLite 3, Custom token auth
-  ⚛️  Frontend:  React 18, Vite 5, React Router DOM 6, Recharts 2.12, Vanilla CSS
+  🐍 Backend:   Python 3.14, Django 5+, SQLite 3, Custom token auth
+  ⚛️  Frontend:  React 18.3, Vite 5.4, React Router DOM 6, Recharts 2.12, Vanilla CSS
 
 ================================================================================
   3. 📁 FOLDER STRUCTURE
@@ -93,7 +93,33 @@ system that automatically deducts from the correct money pool. 🏦
   |-- README.txt                        # This file 📖
 
 ================================================================================
-  4. 🗄️ DATA MODELS (backend/tracker/models.py)
+  4. ▶️ HOW TO RUN THE APP ON WINDOWS
+================================================================================
+
+  Open two terminals and run the backend and frontend separately.
+
+  Backend:
+
+    cd /d C:\finance-tracker\backend
+    C:\Users\krish\.local\bin\python3.14.exe manage.py runserver
+
+  Frontend in Command Prompt:
+
+    cd /d C:\finance-tracker\frontend
+    npm install
+    npm run dev
+
+  Frontend in PowerShell:
+
+    Set-Location C:\finance-tracker\frontend
+    npm.cmd install
+    npm.cmd run dev
+
+  If PowerShell blocks `npm`, use `npm.cmd` or run the frontend from Command
+  Prompt instead.
+
+================================================================================
+  5. 🗄️ DATA MODELS (backend/tracker/models.py)
 ================================================================================
 
   👤 User (Custom, email-based)
@@ -130,7 +156,7 @@ system that automatically deducts from the correct money pool. 🏦
                   ecommerce, affiliates, investments, other.
 
 ================================================================================
-  5. 🌐 API ENDPOINTS (backend/tracker/urls.py + views.py)
+  6. 🌐 API ENDPOINTS (backend/tracker/urls.py + views.py)
 ================================================================================
 
   All endpoints prefixed with /api/. Protected = requires Authorization header. 🔐
@@ -168,7 +194,7 @@ system that automatically deducts from the correct money pool. 🏦
   Headers: Authorization: Token <your-token-here> 🗝️
 
 ================================================================================
-  6. 🗺️ APPLICATION SECTIONS
+  7. 🗺️ APPLICATION SECTIONS
 ================================================================================
 
   6.1 🔐 AUTHENTICATION (Login / Register)
@@ -226,7 +252,7 @@ system that automatically deducts from the correct money pool. 🏦
   - ☀️/🌙 toggle in navbar. Saved in localStorage. Smooth 0.3s transitions.
 
 ================================================================================
-  7. 🤖 DEMO ACCOUNT
+  8. 🤖 DEMO ACCOUNT
 ================================================================================
 
   Run seed_demo.py to create a fully populated demo account: 🚀
@@ -245,7 +271,7 @@ system that automatically deducts from the correct money pool. 🏦
     - Cashflow: ₹82,182 ✅
 
 ================================================================================
-  8. 📄 WORD REPORT GENERATION
+  9. 📄 WORD REPORT GENERATION
 ================================================================================
 
   Generates a complete project report Word document: 🖨️

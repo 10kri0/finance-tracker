@@ -5,7 +5,6 @@ import { useTheme } from '../context/ThemeContext'
 import { categoryAPI } from '../api/api'
 
 export default function ManageBudgets() {
-  const { user } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const navigate = useNavigate()
 

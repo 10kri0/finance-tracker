@@ -1,6 +1,5 @@
 """Pure Django views — no DRF dependency. Token auth via custom header."""
 import json
-import hashlib
 import secrets
 from datetime import date as date_type
 from decimal import Decimal, InvalidOperation
@@ -82,10 +81,7 @@ def serialize_month_detail(m):
 
 # ─── Token store (simple DB-less approach using Django sessions) ───
 # We'll use a simple token table approach with the User model.
-# Tokens stored in a simple file/dict. For simplicity, we use
-# a hashed token stored in user's profile or a simple dict.
-
-_tokens = {}  # token -> user_id (in-memory, reloaded from DB)
+# Tokens stored in a simple file/dict.
 
 
 def _load_tokens():
