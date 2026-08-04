@@ -20,6 +20,8 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [showExpenseModal, setShowExpenseModal] = useState(false)
   const [showIncomeModal, setShowIncomeModal] = useState(false)
+  const [editingExpense, setEditingExpense] = useState(null)
+  const [editingIncome, setEditingIncome] = useState(null)
   const [activeTab, setActiveTab] = useState('overview')
   const [selectedMonthId, setSelectedMonthId] = useState('')
 
@@ -134,7 +136,7 @@ export default function Dashboard() {
                 <Charts data={data} onSelectMonth={setSelectedMonthId} />
               </div>
               <div className="grid-col-1">
-                <BudgetTable categories={data.categories} />
+                <BudgetTable categories={data.categories} onSetBudget={() => navigate('/budgets')} />
               </div>
             </div>
             <MonthlyStats months={data.months} onSelectMonth={setSelectedMonthId} selectedMonthId={selectedMonthId} currentMonthId={data.current_month.id} />
@@ -146,7 +148,8 @@ export default function Dashboard() {
             <div className="grid-col-1">
               <ExpenseTable
                 expenses={data.recent_expenses}
-                onAdd={() => setShowExpenseModal(true)}
+                onAdd={() => { setEditingExpense(null); setShowExpenseModal(true) }}
+                onEdit={(exp) => { setEditingExpense(exp); setShowExpenseModal(true) }}
                 onRefresh={refresh}
                 monthName={data.current_month.name}
               />
@@ -154,7 +157,8 @@ export default function Dashboard() {
             <div className="grid-col-1">
               <IncomeTable
                 incomes={data.recent_incomes}
-                onAdd={() => setShowIncomeModal(true)}
+                onAdd={() => { setEditingIncome(null); setShowIncomeModal(true) }}
+                onEdit={(inc) => { setEditingIncome(inc); setShowIncomeModal(true) }}
                 onRefresh={refresh}
                 monthName={data.current_month.name}
               />
@@ -169,7 +173,7 @@ export default function Dashboard() {
                 ⚙️ Manage Budgets & Categories
               </button>
             </div>
-            <BudgetTable categories={data.categories} expanded />
+            <BudgetTable categories={data.categories} expanded onSetBudget={() => navigate('/budgets')} />
             <MonthlyStats months={data.months} />
           </>
         )}
@@ -180,13 +184,15 @@ export default function Dashboard() {
       {showExpenseModal && (
         <AddExpenseModal
           categories={data.categories}
-          onClose={() => setShowExpenseModal(false)}
+          initialData={editingExpense}
+          onClose={() => { setShowExpenseModal(false); setEditingExpense(null) }}
           onSaved={refresh}
         />
       )}
       {showIncomeModal && (
         <AddIncomeModal
-          onClose={() => setShowIncomeModal(false)}
+          initialData={editingIncome}
+          onClose={() => { setShowIncomeModal(false); setEditingIncome(null) }}
           onSaved={refresh}
         />
       )}

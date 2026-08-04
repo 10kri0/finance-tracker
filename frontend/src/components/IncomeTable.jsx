@@ -11,7 +11,7 @@ const SOURCE_COLORS = {
   other: '#6b7280',
 }
 
-export default function IncomeTable({ incomes, onAdd, onRefresh, monthName }) {
+export default function IncomeTable({ incomes, onAdd, onEdit, onRefresh, monthName }) {
   const handleDelete = async (id) => {
     if (!confirm('Delete this income?')) return
     try {
@@ -63,6 +63,7 @@ export default function IncomeTable({ incomes, onAdd, onRefresh, monthName }) {
                   </td>
                   <td className="date-cell">{new Date(inc.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
                   <td>
+                    <button className="btn btn-ghost btn-sm" onClick={() => onEdit(inc)} title="Edit" style={{ marginRight: '0.35rem' }}>✎</button>
                     <button className="btn-delete" onClick={() => handleDelete(inc.id)} title="Delete">×</button>
                   </td>
                 </tr>

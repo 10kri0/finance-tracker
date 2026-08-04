@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { expenseAPI } from '../api/api'
 
-export default function AddExpenseModal({ categories, onClose, onSaved }) {
+export default function AddExpenseModal({ categories, initialData, onClose, onSaved }) {
   const [name, setName]               = useState('')
   const [amount, setAmount]           = useState('')
   const today                         = new Date().toISOString().split('T')[0]
@@ -10,22 +10,41 @@ export default function AddExpenseModal({ categories, onClose, onSaved }) {
   const [error, setError]             = useState('')
   const [loading, setLoading]         = useState(false)
 
+  useEffect(() => {
+    if (initialData) {
+      setName(initialData.name || '')
+      setAmount(initialData.amount ? String(initialData.amount) : '')
+      setDate(initialData.date || today)
+      setCategoryId(initialData.category ? String(initialData.category) : '')
+    } else {
+      setName('')
+      setAmount('')
+      setDate(today)
+      setCategoryId('')
+    }
+  }, [initialData, today])
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
     setLoading(true)
     try {
-      await expenseAPI.create({
+      const payload = {
         name,
         amount: parseFloat(amount),
         date,
         category: categoryId || null,
         payment_method: 'cash',
-      })
+      }
+      if (initialData?.id) {
+        await expenseAPI.update(initialData.id, payload)
+      } else {
+        await expenseAPI.create(payload)
+      }
       onSaved()
       onClose()
     } catch (err) {
-      setError('Failed to add expense')
+      setError(initialData?.id ? 'Failed to update expense' : 'Failed to add expense')
     } finally {
       setLoading(false)
     }
@@ -35,7 +54,7 @@ export default function AddExpenseModal({ categories, onClose, onSaved }) {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-card" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <h2><span className="modal-icon">↑</span> Add Expense</h2>
+          <h2><span className="modal-icon">↑</span> {initialData?.id ? 'Edit Expense' : 'Add Expense'}</h2>
           <button className="modal-close" onClick={onClose}>×</button>
         </div>
         <form onSubmit={handleSubmit} className="modal-form">
@@ -75,7 +94,7 @@ export default function AddExpenseModal({ categories, onClose, onSaved }) {
           <div className="modal-actions">
             <button type="button" className="btn btn-ghost" onClick={onClose}>Cancel</button>
             <button type="submit" className="btn btn-expense" disabled={loading}>
-              {loading ? 'Adding...' : 'Add Expense'}
+              {loading ? (initialData?.id ? 'Saving...' : 'Adding...') : (initialData?.id ? 'Save Expense' : 'Add Expense')}
             </button>
           </div>
         </form>

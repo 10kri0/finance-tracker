@@ -1,4 +1,4 @@
-export default function BudgetTable({ categories, expanded }) {
+export default function BudgetTable({ categories, expanded, onSetBudget }) {
   // Always show BALANCE categories first
   const sorted = [...categories].sort((a, b) => {
     const aIsBalance = a.category_type === 'BALANCE' ? 0 : 1
@@ -8,11 +8,20 @@ export default function BudgetTable({ categories, expanded }) {
 
   return (
     <div className={`table-card ${expanded ? 'expanded' : ''}`}>
-      <div className="table-header">
+      <div className="table-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem' }}>
         <h3>
           <span className="table-icon budget-icon">📊</span>
           Budget Overview
         </h3>
+        {onSetBudget && (
+          <button
+            className="btn btn-ghost"
+            onClick={onSetBudget}
+            style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
+          >
+            Set Budget
+          </button>
+        )}
       </div>
       <div className="budget-list">
         {sorted.map(cat => {

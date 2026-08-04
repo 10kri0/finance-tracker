@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { incomeAPI } from '../api/api'
 
 const SOURCES = [
@@ -12,7 +12,7 @@ const SOURCES = [
   { value: 'other', label: 'Other' },
 ]
 
-export default function AddIncomeModal({ onClose, onSaved }) {
+export default function AddIncomeModal({ initialData, onClose, onSaved }) {
   const [name, setName] = useState('')
   const [amount, setAmount] = useState('')
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
@@ -20,21 +20,40 @@ export default function AddIncomeModal({ onClose, onSaved }) {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
+  useEffect(() => {
+    if (initialData) {
+      setName(initialData.name || '')
+      setAmount(initialData.amount ? String(initialData.amount) : '')
+      setDate(initialData.date || new Date().toISOString().split('T')[0])
+      setSource(initialData.source || 'salary')
+    } else {
+      setName('')
+      setAmount('')
+      setDate(new Date().toISOString().split('T')[0])
+      setSource('salary')
+    }
+  }, [initialData])
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
     setLoading(true)
     try {
-      await incomeAPI.create({
+      const payload = {
         name,
         amount: parseFloat(amount),
         date,
         source,
-      })
+      }
+      if (initialData?.id) {
+        await incomeAPI.update(initialData.id, payload)
+      } else {
+        await incomeAPI.create(payload)
+      }
       onSaved()
       onClose()
     } catch (err) {
-      setError('Failed to add income')
+      setError(initialData?.id ? 'Failed to update income' : 'Failed to add income')
     } finally {
       setLoading(false)
     }
@@ -44,7 +63,7 @@ export default function AddIncomeModal({ onClose, onSaved }) {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-card" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <h2><span className="modal-icon income-icon">↓</span> Add Income</h2>
+          <h2><span className="modal-icon income-icon">↓</span> {initialData?.id ? 'Edit Income' : 'Add Income'}</h2>
           <button className="modal-close" onClick={onClose}>×</button>
         </div>
         <form onSubmit={handleSubmit} className="modal-form">
@@ -74,7 +93,7 @@ export default function AddIncomeModal({ onClose, onSaved }) {
           <div className="modal-actions">
             <button type="button" className="btn btn-ghost" onClick={onClose}>Cancel</button>
             <button type="submit" className="btn btn-income" disabled={loading}>
-              {loading ? 'Adding...' : 'Add Income'}
+              {loading ? (initialData?.id ? 'Saving...' : 'Adding...') : (initialData?.id ? 'Save Income' : 'Add Income')}
             </button>
           </div>
         </form>

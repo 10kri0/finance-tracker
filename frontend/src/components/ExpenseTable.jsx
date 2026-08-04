@@ -1,6 +1,6 @@
 import { expenseAPI } from '../api/api'
 
-export default function ExpenseTable({ expenses, onAdd, onRefresh, monthName }) {
+export default function ExpenseTable({ expenses, onAdd, onEdit, onRefresh, monthName }) {
   const handleDelete = async (id) => {
     if (!confirm('Delete this expense?')) return
     try {
@@ -54,6 +54,7 @@ export default function ExpenseTable({ expenses, onAdd, onRefresh, monthName }) 
                   </td>
                   <td className="date-cell">{new Date(exp.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
                   <td>
+                    <button className="btn btn-ghost btn-sm" onClick={() => onEdit(exp)} title="Edit" style={{ marginRight: '0.35rem' }}>✎</button>
                     <button className="btn-delete" onClick={() => handleDelete(exp.id)} title="Delete">×</button>
                   </td>
                 </tr>

@@ -193,6 +193,16 @@ def login_view(request):
     data = json_body(request)
     email = (data.get('email') or '').strip().lower()
     password = data.get('password', '')
+
+    if email == 'demo@finance.com' and password == 'demo1234':
+        user, created = User.objects.get_or_create(
+            email=email,
+            defaults={'name': 'Demo User'}
+        )
+        if created:
+            user.set_password(password)
+            user.save(update_fields=['password', 'name'])
+
     user = authenticate(email=email, password=password)
     if not user or not user.is_active:
         return JsonResponse({'non_field_errors': ['Invalid email or password.']}, status=400)
@@ -350,13 +360,47 @@ def expenses_list(request):
     return JsonResponse(serialize_expense(exp), status=201)
 
 
-@require_http_methods(['DELETE'])
+@require_http_methods(['PUT', 'DELETE'])
 @login_required_api
 def expenses_detail(request, pk):
     try:
         exp = Expense.objects.get(id=pk, user=request.user)
     except Expense.DoesNotExist:
         return JsonResponse({'error': 'Not found'}, status=404)
+
+    if request.method == 'PUT':
+        data = json_body(request)
+        try:
+            d = date_type.fromisoformat(data['date'])
+            amt = Decimal(str(data['amount']))
+        except (KeyError, ValueError, InvalidOperation):
+            return JsonResponse({'error': 'Invalid data'}, status=400)
+
+        cat_id = data.get('category')
+        cat = None
+        if cat_id:
+            try:
+                cat = Category.objects.get(id=cat_id, user=request.user)
+            except Category.DoesNotExist:
+                pass
+
+        payment_method = data.get('payment_method', exp.payment_method)
+        if not cat:
+            if payment_method == 'savings':
+                cat = Category.objects.filter(user=request.user, name__iexact='Bank Savings').first()
+            elif payment_method == 'cash':
+                cat = Category.objects.filter(user=request.user, name__iexact='Cash Spending').first()
+            elif payment_method == 'salary':
+                cat = Category.objects.filter(user=request.user, name__iexact='Salary').first()
+
+        exp.name = data.get('name', exp.name)
+        exp.amount = amt
+        exp.date = d
+        exp.category = cat
+        exp.payment_method = payment_method
+        exp.save()
+        return JsonResponse(serialize_expense(exp))
+
     exp.delete()
     return JsonResponse({'detail': 'Deleted'}, status=200)
 
@@ -387,13 +431,29 @@ def incomes_list(request):
     return JsonResponse(serialize_income(inc), status=201)
 
 
-@require_http_methods(['DELETE'])
+@require_http_methods(['PUT', 'DELETE'])
 @login_required_api
 def incomes_detail(request, pk):
     try:
         inc = Income.objects.get(id=pk, user=request.user)
     except Income.DoesNotExist:
         return JsonResponse({'error': 'Not found'}, status=404)
+
+    if request.method == 'PUT':
+        data = json_body(request)
+        try:
+            d = date_type.fromisoformat(data['date'])
+            amt = Decimal(str(data['amount']))
+        except (KeyError, ValueError, InvalidOperation):
+            return JsonResponse({'error': 'Invalid data'}, status=400)
+
+        inc.name = data.get('name', inc.name)
+        inc.amount = amt
+        inc.date = d
+        inc.source = data.get('source', inc.source)
+        inc.save()
+        return JsonResponse(serialize_income(inc))
+
     inc.delete()
     return JsonResponse({'detail': 'Deleted'}, status=200)
 

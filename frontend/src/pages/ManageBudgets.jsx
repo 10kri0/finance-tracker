@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
 import { categoryAPI } from '../api/api'
+import MonthlyBudgetCard from '../components/MonthlyBudgetCard'
 
 export default function ManageBudgets() {
   const { theme, toggleTheme } = useTheme()
@@ -58,26 +59,58 @@ export default function ManageBudgets() {
     }
   }
 
+  const applyMonthlyBudgetToEditableCategories = async (value) => {
+    const editable = categories.filter(cat => cat.category_type !== 'BALANCE' && !cat.is_protected)
+
+    if (editable.length === 0) {
+      throw new Error('There are no editable categories to update.')
+    }
+
+    const updates = editable.map(cat => {
+      const updated = { ...cat, monthly_budget: value }
+      setModifiedBudgets(prev => ({ ...prev, [cat.id]: String(value) }))
+      return updated
+    })
+
+    if (updates.length > 0) {
+      setSuccessMsg(`Prepared ${updates.length} categories for a monthly budget of ₹${value.toFixed(2)}.`)
+      setTimeout(() => setSuccessMsg(null), 3000)
+    }
+  }
+
   const handleSaveChanges = async () => {
     setSaving(true)
     setError(null)
     setSuccessMsg(null)
     try {
-      for (const [id, newBudget] of Object.entries(modifiedBudgets)) {
+      const updates = Object.entries(modifiedBudgets)
+      if (updates.length === 0) {
+        setSuccessMsg('No budget changes to save.')
+        setTimeout(() => setSuccessMsg(null), 2000)
+        return
+      }
+
+      for (const [id, newBudget] of updates) {
         const cat = categories.find(c => c.id == id)
-        if (cat) {
-          await categoryAPI.update(id, {
-            ...cat,
-            monthly_budget: parseFloat(newBudget) || 0
-          })
+        if (!cat) continue
+        const budgetValue = parseFloat(newBudget)
+        if (Number.isNaN(budgetValue) || budgetValue < 0) {
+          throw new Error('Budgets must be zero or greater')
         }
+        await categoryAPI.update(id, {
+          name: cat.name,
+          icon: cat.icon,
+          monthly_budget: budgetValue,
+          category_type: cat.category_type,
+          is_protected: cat.is_protected,
+        })
       }
       setModifiedBudgets({})
       await fetchCategories()
-      setSuccessMsg('Changes saved successfully!')
+      setSuccessMsg('Budget updates saved successfully!')
       setTimeout(() => setSuccessMsg(null), 3000)
     } catch (err) {
-      setError('Failed to save some changes.')
+      setError(err.message || 'Failed to save some changes.')
     } finally {
       setSaving(false)
     }
@@ -127,7 +160,7 @@ export default function ManageBudgets() {
             <div className="profile-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <div className="profile-card-icon">🎯</div>
-                <h2 style={{ margin: 0 }}>Set Expense Budgets</h2>
+                <h2 style={{ margin: 0 }}>Set Monthly Budgets</h2>
               </div>
               {Object.keys(modifiedBudgets).length > 0 && (
                 <button 
@@ -142,6 +175,12 @@ export default function ManageBudgets() {
             
             {error && <div className="profile-msg profile-msg-error">{error}</div>}
             {successMsg && <div className="profile-msg profile-msg-success">{successMsg}</div>}
+
+            <MonthlyBudgetCard
+              categories={categories}
+              loading={loading}
+              onApply={applyMonthlyBudgetToEditableCategories}
+            />
 
             <div className="category-list" style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {categories.map(cat => (
@@ -160,7 +199,7 @@ export default function ManageBudgets() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                       <label style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                        {cat.is_protected ? 'Balance (₹)' : 'Budget (₹)'}
+                        {cat.is_protected ? 'Balance limit (₹)' : 'Monthly budget (₹)'}
                       </label>
                       <input 
                         type="number" 
@@ -168,7 +207,7 @@ export default function ManageBudgets() {
                         min="0"
                         value={modifiedBudgets[cat.id] !== undefined ? modifiedBudgets[cat.id] : cat.monthly_budget}
                         onChange={(e) => setModifiedBudgets(prev => ({ ...prev, [cat.id]: e.target.value }))}
-                        style={{ width: '120px', padding: '0.5rem', borderRadius: 'var(--radius)', border: cat.is_protected ? '1px solid #6366f1' : '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
+                        style={{ width: '140px', padding: '0.5rem', borderRadius: 'var(--radius)', border: cat.is_protected ? '1px solid #6366f1' : '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
                       />
                     </div>
                     {cat.is_protected ? (
