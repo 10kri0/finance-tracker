@@ -1,7 +1,7 @@
 # SpendWise Finance Tracker
 
 Version: 1.2.0  
-Last Updated: 2026-08-05
+Last Updated: 2026-08-05 UTC 11:00:00 AM
 
 SpendWise is a full-stack personal finance tracker built with Django and React. It helps users manage income, expenses, monthly budgets, category trends, account balances, and downloadable financial reports.
 
