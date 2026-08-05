@@ -1,2 +1,4 @@
 bank statment.pdf
 *.pdf
+*.txt
+.env

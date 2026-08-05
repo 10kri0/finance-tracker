@@ -42,7 +42,7 @@ def filter_by_date_range(queryset, request):
 
 
 def serialize_user(user):
-    return {'id': user.id, 'email': user.email, 'name': user.name,
+    return {'id': str(user.id), 'email': user.email, 'name': user.name,
             'date_joined': user.date_joined.isoformat()}
 
 
@@ -58,7 +58,7 @@ def serialize_category(cat, now=None):
     if cat.category_type == 'BALANCE':
         remaining_balance = float(cat.monthly_budget - exp)
 
-    return {'id': cat.id, 'name': cat.name, 'icon': cat.icon,
+    return {'id': str(cat.id), 'name': cat.name, 'icon': cat.icon,
             'monthly_budget': float(cat.monthly_budget),
             'expense_this_month': float(exp), 'usage': round(usage, 1),
             'remaining_balance': remaining_balance,
@@ -67,25 +67,25 @@ def serialize_category(cat, now=None):
 
 
 def serialize_expense(exp):
-    return {'id': exp.id, 'name': exp.name, 'amount': float(exp.amount),
+    return {'id': str(exp.id), 'name': exp.name, 'amount': float(exp.amount),
             'date': exp.date.isoformat(),
-            'category': exp.category_id,
+            'category': str(exp.category_id) if exp.category_id else None,
             'category_name': exp.category.name if exp.category else None,
             'category_icon': exp.category.icon if exp.category else '📁',
             'payment_method': exp.payment_method,
-            'month': exp.month_id, 'created_at': exp.created_at.isoformat()}
+            'month': str(exp.month_id), 'created_at': exp.created_at.isoformat()}
 
 
 def serialize_income(inc):
     source_map = dict(Income.SOURCE_CHOICES)
-    return {'id': inc.id, 'name': inc.name, 'amount': float(inc.amount),
+    return {'id': str(inc.id), 'name': inc.name, 'amount': float(inc.amount),
             'date': inc.date.isoformat(), 'source': inc.source,
             'source_display': source_map.get(inc.source, inc.source),
-            'month': inc.month_id, 'created_at': inc.created_at.isoformat()}
+            'month': str(inc.month_id), 'created_at': inc.created_at.isoformat()}
 
 
 def serialize_month(m):
-    return {'id': m.id, 'name': m.name, 'year': m.year, 'month': m.month,
+    return {'id': str(m.id), 'name': m.name, 'year': m.year, 'month': m.month,
             'total_income': float(m.total_income), 'total_expense': float(m.total_expense),
             'cashflow': float(m.cashflow), 'budget_usage': float(m.budget_usage)}
 
@@ -125,7 +125,7 @@ def create_token(user):
     # Remove old tokens for this user
     tokens = {k: v for k, v in tokens.items() if v != user.id}
     token = secrets.token_hex(20)
-    tokens[token] = user.id
+    tokens[token] = str(user.id)
     _save_tokens(tokens)
     return token
 

@@ -29,7 +29,7 @@ SpendWise is a full-stack personal finance tracker built with Django and React. 
 
 ## Technology Stack
 
-- Backend: Python, Django, SQLite
+- Backend: Python, Django, MongoDB Atlas (official Django MongoDB backend)
 - Frontend: React 18, Vite 5, React Router 6, Recharts, jsPDF, jsPDF-AutoTable, SheetJS (xlsx)
 - Styling: Custom CSS with theme support
 
@@ -60,10 +60,24 @@ From the project root:
 
 ```bash
 cd backend
+c:/finance-tracker/.venv/Scripts/python.exe -m pip install -r requirements.txt
 c:/finance-tracker/.venv/Scripts/python.exe manage.py migrate
 c:/finance-tracker/.venv/Scripts/python.exe manage.py seed_data
 c:/finance-tracker/.venv/Scripts/python.exe manage.py runserver
 ```
+
+MongoDB is configured with the `MONGODB_URI` value in the project-root `.env` file. If the URI does not name a database, the app uses `spendwise`; optionally set `MONGODB_DATABASE` to override it.
+
+### Migrating Existing SQLite Data
+
+The old `backend/db.sqlite3` is preserved as a backup. After running MongoDB migrations, import its existing users and finance records once with:
+
+```bash
+cd backend
+c:/finance-tracker/.venv/Scripts/python.exe manage.py migrate_sqlite_to_mongodb
+```
+
+The importer is idempotent and records imported legacy IDs, so rerunning it does not duplicate transactions.
 
 The seed command creates the demo user and sample finance data, including starter categories, months, expenses, and incomes.
 
