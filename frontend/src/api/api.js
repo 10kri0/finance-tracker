@@ -1,4 +1,6 @@
-const API_BASE = '/api'
+// Local development uses Vite's /api proxy. Production uses the deployed
+// Django API URL supplied at build time by Vite.
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '')
 
 function getHeaders() {
   const token = localStorage.getItem('token')
