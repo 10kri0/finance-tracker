@@ -23,6 +23,24 @@ def json_body(request):
         return {}
 
 
+def filter_by_date_range(queryset, request):
+    """Apply optional ISO start/end date filters, returning None when invalid."""
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    try:
+        start = date_type.fromisoformat(start_date) if start_date else None
+        end = date_type.fromisoformat(end_date) if end_date else None
+    except ValueError:
+        return None
+    if start and end and start > end:
+        return None
+    if start:
+        queryset = queryset.filter(date__gte=start)
+    if end:
+        queryset = queryset.filter(date__lte=end)
+    return queryset
+
+
 def serialize_user(user):
     return {'id': user.id, 'email': user.email, 'name': user.name,
             'date_joined': user.date_joined.isoformat()}
@@ -321,6 +339,9 @@ def dashboard_view(request):
 def expenses_list(request):
     if request.method == 'GET':
         qs = Expense.objects.filter(user=request.user).select_related('category', 'month')
+        qs = filter_by_date_range(qs, request)
+        if qs is None:
+            return JsonResponse({'error': 'Use valid start_date and end_date values.'}, status=400)
         return JsonResponse([serialize_expense(e) for e in qs], safe=False)
 
     data = json_body(request)
@@ -412,6 +433,9 @@ def expenses_detail(request, pk):
 def incomes_list(request):
     if request.method == 'GET':
         qs = Income.objects.filter(user=request.user).select_related('month')
+        qs = filter_by_date_range(qs, request)
+        if qs is None:
+            return JsonResponse({'error': 'Use valid start_date and end_date values.'}, status=400)
         return JsonResponse([serialize_income(i) for i in qs], safe=False)
 
     data = json_body(request)

@@ -93,6 +93,14 @@ a:hover { text-decoration: underline; }
 .quick-actions { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
 .section-greeting { font-size: 1.5rem; }
 .action-buttons { display: flex; gap: 10px; }
+.custom-download-section { max-width: 820px; margin: 0 auto; padding: 28px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-card); }
+.custom-download-section__intro h2 { margin: 0 0 6px; font-size: 1.25rem; }
+.custom-download-section__intro p { margin: 0; color: var(--text-muted); }
+.custom-download-section__form { display: flex; align-items: end; flex-wrap: wrap; gap: 16px; margin-top: 24px; }
+.custom-download-section__form label { display: flex; flex: 1 1 180px; flex-direction: column; gap: 6px; color: var(--text-muted); font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+.custom-download-section__form input { padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-input); color: var(--text); font: inherit; }
+.custom-download-section__actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.custom-download-section__message { margin: 16px 0 0; color: var(--rose); font-size: 0.85rem; }
 
 /* ─── Buttons ─── */
 .btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px; border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 600; cursor: pointer; border: none; font-family: var(--font); transition: all 0.2s; }

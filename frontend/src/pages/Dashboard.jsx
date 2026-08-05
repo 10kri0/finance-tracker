@@ -11,6 +11,7 @@ import MonthlyStats from '../components/MonthlyStats'
 import Charts from '../components/Charts'
 import AddExpenseModal from '../components/AddExpenseModal'
 import AddIncomeModal from '../components/AddIncomeModal'
+import CustomDownloadSection from '../components/CustomDownloadSection'
 
 export default function Dashboard() {
   const { user, logout } = useAuth()
@@ -87,6 +88,10 @@ export default function Dashboard() {
             className={`nav-tab ${activeTab === 'budget' ? 'active' : ''}`}
             onClick={() => setActiveTab('budget')}
           >Budget</button>
+          <button
+            className={`nav-tab ${activeTab === 'downloads' ? 'active' : ''}`}
+            onClick={() => setActiveTab('downloads')}
+          >Downloads</button>
 
         </nav>
         <div className="header-right">
@@ -177,6 +182,8 @@ export default function Dashboard() {
             <MonthlyStats months={data.months} />
           </>
         )}
+
+        {activeTab === 'downloads' && <CustomDownloadSection categories={data.categories} />}
 
       </main>
 

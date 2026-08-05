@@ -1,7 +1,7 @@
 # SpendWise Finance Tracker
 
 Version: 1.1.0
-Last Updated: 2026-08-05
+Last Updated: 2026-08-05 10:17:23 IST (+05:30)
 
 SpendWise is a full-stack personal finance tracker built with Django and React. It helps users manage income, expenses, monthly budgets, category trends, and account balances in a single dashboard-driven experience.
 
@@ -13,6 +13,7 @@ This project combines a Django backend with a React frontend to provide a lightw
 
 - Secure email-based authentication and profile management
 - Dashboard with summary cards, monthly stats, charts, and recent transactions
+- Custom date range export to Excel (.xlsx) and PDF report documents
 - Expense and income entry with monthly organization
 - Budget management with category-level editing and a monthly budget setup card
 - Protected balance categories such as savings and cash spending
@@ -20,6 +21,11 @@ This project combines a Django backend with a React frontend to provide a lightw
 - Demo access for quick testing:
   - Email: demo@finance.com
   - Password: demo1234
+
+## Recent & Necessary Updates (August 2026)
+
+- **Custom Date Range Export**: Added backend endpoints and modal dialog to export transactions and financial summaries in Excel (`.xlsx`) and PDF formats for any specified date range.
+- **Code Optimization & Cleanup**: Removed unnecessary dependencies (`djangorestframework`), removed unused frontend API wrappers, and cleaned up redundant imports and dead code in backend views.
 
 ## Technology Stack
 
@@ -97,6 +103,7 @@ All API routes are prefixed with `/api/`.
 - `POST /api/categories/`
 - `PUT /api/categories/<id>/`
 - `DELETE /api/categories/<id>/`
+- `GET /api/export/?start_date=...&end_date=...&format=excel|pdf`
 
 ## Typical User Flow
 
