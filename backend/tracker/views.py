@@ -11,7 +11,7 @@ from django.contrib.auth import authenticate
 from django.utils import timezone
 from django.db.models import Sum
 
-from .models import User, Category, Month, Expense, Income
+from .models import ApiToken, User, Category, Month, Expense, Income
 
 
 # ─── Helpers ────────────────────────────────────────────────
@@ -102,49 +102,20 @@ def serialize_month_detail(m):
 # Tokens stored in a simple file/dict.
 
 
-def _load_tokens():
-    """Load tokens from a simple JSON file."""
-    import os
-    token_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.tokens.json')
-    try:
-        with open(token_file, 'r') as f:
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return {}
-
-
-def _save_tokens(tokens):
-    import os
-    token_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.tokens.json')
-    with open(token_file, 'w') as f:
-        json.dump(tokens, f)
-
-
 def create_token(user):
-    tokens = _load_tokens()
-    # Remove old tokens for this user
-    tokens = {k: v for k, v in tokens.items() if v != user.id}
     token = secrets.token_hex(20)
-    tokens[token] = str(user.id)
-    _save_tokens(tokens)
+    ApiToken.objects.filter(user=user).delete()
+    ApiToken.objects.create(key=token, user=user)
     return token
 
 
 def delete_token(token):
-    tokens = _load_tokens()
-    tokens.pop(token, None)
-    _save_tokens(tokens)
+    ApiToken.objects.filter(key=token).delete()
 
 
 def get_user_from_token(token):
-    tokens = _load_tokens()
-    user_id = tokens.get(token)
-    if user_id:
-        try:
-            return User.objects.get(id=user_id, is_active=True)
-        except User.DoesNotExist:
-            return None
-    return None
+    token_record = ApiToken.objects.select_related('user').filter(key=token, user__is_active=True).first()
+    return token_record.user if token_record else None
 
 
 # ─── Auth decorator ─────────────────────────────────────────

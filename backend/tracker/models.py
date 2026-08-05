@@ -39,6 +39,14 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.email
 
 
+class ApiToken(models.Model):
+    """Persistent API token for header-based authentication."""
+
+    key = models.CharField(max_length=64, unique=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='api_tokens')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
 class Category(models.Model):
     """Expense category with monthly budget."""
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='categories')
