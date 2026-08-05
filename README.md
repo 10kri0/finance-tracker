@@ -1,7 +1,7 @@
 # SpendWise Finance Tracker
 
-Version: 1.2.0  
-Last Updated: 2026-08-05 UTC 11:00:00 AM
+Version: 1.3.0  
+Last Updated: 2026-08-05 UTC
 
 SpendWise is a full-stack personal finance tracker built with Django and React. It helps users manage income, expenses, monthly budgets, category trends, account balances, and downloadable financial reports.
 
@@ -26,6 +26,7 @@ SpendWise is a full-stack personal finance tracker built with Django and React. 
 - Added on-demand PDF and Excel generation. The report libraries are loaded only when a download is requested, keeping the main dashboard bundle smaller.
 - Added server-side date filtering to the expenses and incomes APIs.
 - Removed unused Django REST Framework and django-cors-headers requirements; the app uses Django views and its own CORS middleware.
+- Migrated persistence from SQLite to MongoDB Atlas using the official Django MongoDB backend.
 
 ## Technology Stack
 
@@ -37,8 +38,10 @@ SpendWise is a full-stack personal finance tracker built with Django and React. 
 
 ```text
 finance-tracker/
+├── .env                              # MongoDB connection settings (not committed)
 ├── backend/
 │   ├── config/
+│   ├── mongo_migrations/             # MongoDB-native Django migrations
 │   ├── tracker/
 │   ├── manage.py
 │   └── requirements.txt
@@ -54,39 +57,55 @@ finance-tracker/
 
 ## Getting Started
 
-### Backend Setup
+### 1. Configure MongoDB Atlas
 
-From the project root:
+Create a project-root `.env` file (or use the existing one) with your Atlas connection string:
 
-```bash
-cd backend
-c:/finance-tracker/.venv/Scripts/python.exe -m pip install -r requirements.txt
-c:/finance-tracker/.venv/Scripts/python.exe manage.py migrate
-c:/finance-tracker/.venv/Scripts/python.exe manage.py seed_data
-c:/finance-tracker/.venv/Scripts/python.exe manage.py runserver
+```env
+MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>/<database>?retryWrites=true&w=majority
 ```
 
-MongoDB is configured with the `MONGODB_URI` value in the project-root `.env` file. If the URI does not name a database, the app uses `spendwise`; optionally set `MONGODB_DATABASE` to override it.
+If the URI does not include a database name, SpendWise uses `spendwise`. To use a different name, add:
+
+```env
+MONGODB_DATABASE=your_database_name
+```
+
+Do not commit `.env`; it contains credentials and is ignored by Git.
+
+### 2. Start the Backend
+
+Open a PowerShell terminal and run:
+
+```powershell
+cd C:\finance-tracker\backend
+C:\finance-tracker\.venv\Scripts\python.exe -m pip install -r requirements.txt
+C:\finance-tracker\.venv\Scripts\python.exe manage.py migrate
+C:\finance-tracker\.venv\Scripts\python.exe manage.py seed_data
+C:\finance-tracker\.venv\Scripts\python.exe manage.py runserver
+```
+
+The backend must remain running. It is available at <http://127.0.0.1:8000/>. The frontend will not work until this terminal has started the Django server.
 
 ### Migrating Existing SQLite Data
 
 The old `backend/db.sqlite3` is preserved as a backup. After running MongoDB migrations, import its existing users and finance records once with:
 
-```bash
-cd backend
-c:/finance-tracker/.venv/Scripts/python.exe manage.py migrate_sqlite_to_mongodb
+```powershell
+cd C:\finance-tracker\backend
+C:\finance-tracker\.venv\Scripts\python.exe manage.py migrate_sqlite_to_mongodb
 ```
 
 The importer is idempotent and records imported legacy IDs, so rerunning it does not duplicate transactions.
 
 The seed command creates the demo user and sample finance data, including starter categories, months, expenses, and incomes.
 
-### Frontend Setup
+### 3. Start the Frontend
 
-In a separate terminal:
+Open a second terminal while the backend is still running:
 
-```bash
-cd frontend
+```powershell
+cd C:\finance-tracker\frontend
 npm install
 npm run dev
 ```
@@ -154,6 +173,9 @@ npm run build
 ## Troubleshooting
 
 - If the frontend cannot connect to the backend, confirm that Django is running on port 8000.
+- If `manage.py migrate` reports `MONGODB_URI is required`, add a valid `MONGODB_URI` to `C:\finance-tracker\.env` and restart the command.
+- If Atlas connection fails, confirm the database user credentials and add your current IP address to the Atlas Network Access allowlist.
+- If the backend shows an incorrect database, set `MONGODB_DATABASE` explicitly in `.env`.
 - If the demo login fails, run the seed command again and verify the backend is active.
 - If PowerShell blocks npm scripts, use `npm.cmd`.
 - If a custom download reports no data, verify that transactions exist in the selected inclusive date range.
